@@ -2,17 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-// --- Reusable Components ---
+// --- Reusable Components (Government Style) ---
 
-const StatsCard = ({ label, value, icon, color }) => (
-  <div className="bg-white rounded-xl shadow-lg p-6 flex items-center justify-between">
-    <div>
-      <p className="text-sm font-medium text-gray-600">{label}</p>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
-    </div>
-    <div className={`w-12 h-12 bg-${color}-100 rounded-full flex items-center justify-center text-${color}-600 text-xl`}>
-      {icon}
-    </div>
+const StatsCard = ({ label, value, color }) => (
+  <div className="bg-white border border-surface-200 p-4 shadow-card">
+    <p className="text-xs font-bold text-surface-500 uppercase tracking-wider mb-1">{label}</p>
+    <p className={`text-3xl font-bold text-${color}-700`}>{value}</p>
   </div>
 );
 
@@ -38,39 +33,58 @@ const QuestionModal = ({ isOpen, onClose, onSave, initialData }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <h3 className="text-xl font-bold mb-4">{initialData ? 'Edit Question' : 'Add New Question'}</h3>
-        <div className="space-y-3">
-          <input className="w-full p-2 border rounded" placeholder="Question Text" value={formData.content} onChange={e => setFormData({ ...formData, content: e.target.value })} />
-          <div className="grid grid-cols-2 gap-4">
-            <input className="p-2 border rounded" placeholder="Option A" value={formData.optionA} onChange={e => setFormData({ ...formData, optionA: e.target.value })} />
-            <input className="p-2 border rounded" placeholder="Option B" value={formData.optionB} onChange={e => setFormData({ ...formData, optionB: e.target.value })} />
-            <input className="p-2 border rounded" placeholder="Option C" value={formData.optionC} onChange={e => setFormData({ ...formData, optionC: e.target.value })} />
-            <input className="p-2 border rounded" placeholder="Option D" value={formData.optionD} onChange={e => setFormData({ ...formData, optionD: e.target.value })} />
+    <div className="fixed inset-0 bg-surface-900/50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-lg border border-surface-300">
+        <div className="border-b border-surface-200 pb-2 mb-4">
+          <h3 className="text-lg font-bold text-primary-900">{initialData ? 'EDIT QUESTION' : 'ADD NEW QUESTION'}</h3>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-bold text-surface-700 mb-1">Question Content</label>
+            <textarea className="w-full p-2 border border-surface-300 focus:border-primary-600 outline-none rounded-none text-sm" rows="3" placeholder="Enter question text here..." value={formData.content} onChange={e => setFormData({ ...formData, content: e.target.value })} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <select className="p-2 border rounded" value={formData.correctOption} onChange={e => setFormData({ ...formData, correctOption: e.target.value })}>
-              <option value="A">Correct: Option A</option>
-              <option value="B">Correct: Option B</option>
-              <option value="C">Correct: Option C</option>
-              <option value="D">Correct: Option D</option>
-            </select>
-            <select className="p-2 border rounded" value={formData.difficulty} onChange={e => setFormData({ ...formData, difficulty: e.target.value })}>
-              <option value="Easy">Easy</option>
-              <option value="Medium">Medium</option>
-              <option value="Hard">Hard</option>
-            </select>
-            <select className="p-2 border rounded" value={formData.subject} onChange={e => setFormData({ ...formData, subject: e.target.value })}>
-              <option value="Science">Science</option>
-              <option value="Mathematics">Mathematics</option>
-            </select>
-            <input className="p-2 border rounded" placeholder="Topic (e.g. Geometry)" value={formData.topic || ''} onChange={e => setFormData({ ...formData, topic: e.target.value })} />
+            {['A', 'B', 'C', 'D'].map((opt) => (
+              <div key={opt}>
+                <label className="block text-xs font-bold text-surface-600 mb-1 uppercase">Option {opt}</label>
+                <input className="w-full p-2 border border-surface-300 focus:border-primary-600 outline-none text-sm" placeholder={`Option ${opt}`} value={formData[`option${opt}`]} onChange={e => setFormData({ ...formData, [`option${opt}`]: e.target.value })} />
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-surface-600 mb-1 uppercase">Correct Answer</label>
+              <select className="w-full p-2 border border-surface-300 focus:border-primary-600 outline-none text-sm bg-white" value={formData.correctOption} onChange={e => setFormData({ ...formData, correctOption: e.target.value })}>
+                <option value="A">Option A</option>
+                <option value="B">Option B</option>
+                <option value="C">Option C</option>
+                <option value="D">Option D</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-surface-600 mb-1 uppercase">Difficulty</label>
+              <select className="w-full p-2 border border-surface-300 focus:border-primary-600 outline-none text-sm bg-white" value={formData.difficulty} onChange={e => setFormData({ ...formData, difficulty: e.target.value })}>
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-surface-600 mb-1 uppercase">Subject</label>
+              <select className="w-full p-2 border border-surface-300 focus:border-primary-600 outline-none text-sm bg-white" value={formData.subject} onChange={e => setFormData({ ...formData, subject: e.target.value })}>
+                <option value="Science">Science</option>
+                <option value="Mathematics">Mathematics</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-surface-600 mb-1 uppercase">Topic</label>
+              <input className="w-full p-2 border border-surface-300 focus:border-primary-600 outline-none text-sm" placeholder="e.g. Geometry" value={formData.topic || ''} onChange={e => setFormData({ ...formData, topic: e.target.value })} />
+            </div>
           </div>
         </div>
-        <div className="mt-6 flex justify-end space-x-3">
-          <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
-          <button onClick={handleSubmit} className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">{initialData ? 'Update' : 'Save'} Question</button>
+        <div className="mt-6 flex justify-end space-x-3 pt-4 border-t border-surface-200">
+          <button onClick={onClose} className="px-4 py-2 border border-surface-300 text-surface-700 bg-surface-50 hover:bg-surface-100 text-sm font-medium">CANCEL</button>
+          <button onClick={handleSubmit} className="px-4 py-2 bg-primary-700 text-white hover:bg-primary-800 text-sm font-medium uppercase">{initialData ? 'Update Question' : 'Save Question'}</button>
         </div>
       </div>
     </div>
@@ -163,14 +177,12 @@ const AdminDashboard = () => {
     const headers = { 'Authorization': `Bearer ${user?.token}`, 'Content-Type': 'application/json' };
 
     if (editingQuestion) {
-      // Update
       await fetch(`http://localhost:8081/api/admin/questions/${editingQuestion.id}`, {
         method: 'PUT',
         headers,
         body: JSON.stringify(data)
       });
     } else {
-      // Create
       await fetch(`http://localhost:8081/api/admin/questions`, {
         method: 'POST',
         headers,
@@ -194,47 +206,47 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
+    <div className="h-full bg-accent-100 flex font-sans">
       {/* Sidebar */}
-      <div className="w-64 bg-slate-900 text-white flex flex-col">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">PARAKH ADMIN</h2>
+      <div className="w-64 bg-primary-900 text-white flex flex-col flex-shrink-0">
+        <div className="p-5 border-b border-primary-800 bg-primary-950">
+          <h2 className="text-xl font-bold tracking-tight text-white mb-1">PARAKH</h2>
+          <p className="text-xs text-primary-200 uppercase tracking-widest">Admin Portal</p>
         </div>
-        <nav className="flex-1 px-4 space-y-2">
-          <button onClick={() => setActiveTab('overview')} className={`w-full text-left px-4 py-3 rounded-lg ${activeTab === 'overview' ? 'bg-purple-600' : 'hover:bg-slate-800'}`}>📊 Overview</button>
-          <button onClick={() => setActiveTab('approvals')} className={`w-full text-left px-4 py-3 rounded-lg ${activeTab === 'approvals' ? 'bg-purple-600' : 'hover:bg-slate-800'}`}>🔔 Approvals</button>
-          <button onClick={() => setActiveTab('users')} className={`w-full text-left px-4 py-3 rounded-lg ${activeTab === 'users' ? 'bg-purple-600' : 'hover:bg-slate-800'}`}>👥 Users</button>
-          <button onClick={() => setActiveTab('questions')} className={`w-full text-left px-4 py-3 rounded-lg ${activeTab === 'questions' ? 'bg-purple-600' : 'hover:bg-slate-800'}`}>📚 Question Bank</button>
+        <nav className="flex-1 px-3 py-4 space-y-1">
+          <button onClick={() => setActiveTab('overview')} className={`w-full text-left px-4 py-2.5 text-sm font-medium border-l-4 ${activeTab === 'overview' ? 'bg-primary-800 border-white text-white' : 'border-transparent text-primary-100 hover:bg-primary-800 hover:text-white'}`}>Overview</button>
+          <button onClick={() => setActiveTab('approvals')} className={`w-full text-left px-4 py-2.5 text-sm font-medium border-l-4 ${activeTab === 'approvals' ? 'bg-primary-800 border-white text-white' : 'border-transparent text-primary-100 hover:bg-primary-800 hover:text-white'}`}>Approvals</button>
+          <button onClick={() => setActiveTab('users')} className={`w-full text-left px-4 py-2.5 text-sm font-medium border-l-4 ${activeTab === 'users' ? 'bg-primary-800 border-white text-white' : 'border-transparent text-primary-100 hover:bg-primary-800 hover:text-white'}`}>User Management</button>
+          <button onClick={() => setActiveTab('questions')} className={`w-full text-left px-4 py-2.5 text-sm font-medium border-l-4 ${activeTab === 'questions' ? 'bg-primary-800 border-white text-white' : 'border-transparent text-primary-100 hover:bg-primary-800 hover:text-white'}`}>Question Bank</button>
         </nav>
-        <div className="p-4 border-t border-slate-800">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center font-bold">A</div>
-            <div>
-              <p className="text-sm font-medium">{user?.name || 'Admin'}</p>
-              <p className="text-xs text-gray-400">Administrator</p>
-            </div>
+        <div className="p-4 border-t border-primary-800 bg-primary-950">
+          <div className="mb-3">
+            <p className="text-sm font-semibold text-white">{user?.name || 'Administrator'}</p>
+            <p className="text-xs text-primary-300">System Admin</p>
           </div>
-          <button onClick={() => { logout(); navigate('/login'); }} className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-medium transition-colors">Sign Out</button>
+          <button onClick={() => { logout(); navigate('/login'); }} className="w-full px-3 py-2 bg-red-700 hover:bg-red-800 text-white text-xs font-bold uppercase tracking-wide rounded-sm transition-colors text-center">Sign Out</button>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
-        <header className="bg-white shadow-sm border-b border-gray-200 py-4 px-8">
-          <h1 className="text-2xl font-bold text-gray-800 capitalize">{activeTab}</h1>
+        <header className="bg-white shadow-sm border-b border-surface-200 py-5 px-8">
+          <h1 className="text-2xl font-bold text-primary-900 uppercase tracking-tight">{activeTab === 'users' ? 'User Management' : activeTab === 'questions' ? 'Question Bank' : activeTab}</h1>
         </header>
 
         <main className="p-8">
           {loading ? (
-            <div className="flex justify-center items-center h-64"><div className="animate-spin text-purple-600 text-4xl">🌀</div></div>
+            <div className="flex justify-center items-center h-40">
+              <span className="text-primary-600 font-medium">Loading data...</span>
+            </div>
           ) : (
             <>
               {/* --- OVERVIEW TAB --- */}
               {activeTab === 'overview' && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <StatsCard label="Total Users" value={stats.totalUsers} icon="👥" color="purple" />
-                  <StatsCard label="Questions in Bank" value={stats.totalQuestions} icon="📚" color="blue" />
-                  <StatsCard label="System Status" value="Online" icon="🟢" color="green" />
+                  <StatsCard label="Total Registered Users" value={stats.totalUsers} color="primary" />
+                  <StatsCard label="Questions in Bank" value={stats.totalQuestions} color="primary" />
+                  <StatsCard label="System Status" value="Active" color="green" />
                 </div>
               )}
 
@@ -243,48 +255,68 @@ const AdminDashboard = () => {
                 <div className="space-y-8">
                   {/* Teachers Section */}
                   <div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-4">Pending Teacher Approvals</h3>
+                    <h3 className="text-lg font-bold text-surface-800 mb-3 border-l-4 border-primary-600 pl-3">Pending Teacher Requests</h3>
                     {pendingUsers.filter(u => u.role === 'TEACHER').length === 0 ? (
-                      <p className="text-gray-500 italic">No pending teacher requests.</p>
+                      <div className="bg-white p-4 border border-surface-200 text-surface-500 text-sm">No pending requests found.</div>
                     ) : (
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        {pendingUsers.filter(u => u.role === 'TEACHER').map(u => (
-                          <div key={u.id} className="bg-white p-6 rounded-lg shadow border-l-4 border-blue-500 flex justify-between items-center">
-                            <div>
-                              <h4 className="font-bold text-lg">{u.name}</h4>
-                              <p className="text-sm text-gray-600">{u.email}</p>
-                              <p className="text-sm text-blue-600 mt-1">{u.institution || 'No Institution'}</p>
-                            </div>
-                            <div className="space-x-2">
-                              <button onClick={() => handleApproveUser(u.id)} className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">Approve</button>
-                              <button onClick={() => handleRejectUser(u.id)} className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Reject</button>
-                            </div>
-                          </div>
-                        ))}
+                      <div className="bg-white border border-surface-200 shadow-sm">
+                        <table className="min-w-full divide-y divide-surface-200">
+                          <thead className="bg-surface-50">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Applicant Name</th>
+                              <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Email ID</th>
+                              <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Institution</th>
+                              <th className="px-6 py-3 text-right text-xs font-bold text-surface-600 uppercase tracking-wider">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-surface-200">
+                            {pendingUsers.filter(u => u.role === 'TEACHER').map(u => (
+                              <tr key={u.id}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-surface-900">{u.name}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-600">{u.email}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-600">{u.institution || '-'}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                  <button onClick={() => handleApproveUser(u.id)} className="text-green-700 hover:text-green-900 font-bold uppercase text-xs mr-4">Approve</button>
+                                  <button onClick={() => handleRejectUser(u.id)} className="text-red-700 hover:text-red-900 font-bold uppercase text-xs">Reject</button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
                     )}
                   </div>
 
                   {/* Students Section */}
                   <div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-4">Pending Student Approvals</h3>
+                    <h3 className="text-lg font-bold text-surface-800 mb-3 border-l-4 border-primary-600 pl-3">Pending Student Requests</h3>
                     {pendingUsers.filter(u => u.role === 'STUDENT').length === 0 ? (
-                      <p className="text-gray-500 italic">No pending student requests.</p>
+                      <div className="bg-white p-4 border border-surface-200 text-surface-500 text-sm">No pending requests found.</div>
                     ) : (
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        {pendingUsers.filter(u => u.role === 'STUDENT').map(u => (
-                          <div key={u.id} className="bg-white p-6 rounded-lg shadow border-l-4 border-green-500 flex justify-between items-center">
-                            <div>
-                              <h4 className="font-bold text-lg">{u.name}</h4>
-                              <p className="text-sm text-gray-600">{u.email}</p>
-                              <p className="text-sm text-blue-600 mt-1">{u.institution || 'No Institution'}</p>
-                            </div>
-                            <div className="space-x-2">
-                              <button onClick={() => handleApproveUser(u.id)} className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">Approve</button>
-                              <button onClick={() => handleRejectUser(u.id)} className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Reject</button>
-                            </div>
-                          </div>
-                        ))}
+                      <div className="bg-white border border-surface-200 shadow-sm">
+                        <table className="min-w-full divide-y divide-surface-200">
+                          <thead className="bg-surface-50">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Applicant Name</th>
+                              <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Email ID</th>
+                              <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Institution</th>
+                              <th className="px-6 py-3 text-right text-xs font-bold text-surface-600 uppercase tracking-wider">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-surface-200">
+                            {pendingUsers.filter(u => u.role === 'STUDENT').map(u => (
+                              <tr key={u.id}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-surface-900">{u.name}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-600">{u.email}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-600">{u.institution || '-'}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                  <button onClick={() => handleApproveUser(u.id)} className="text-green-700 hover:text-green-900 font-bold uppercase text-xs mr-4">Approve</button>
+                                  <button onClick={() => handleRejectUser(u.id)} className="text-red-700 hover:text-red-900 font-bold uppercase text-xs">Reject</button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
                     )}
                   </div>
@@ -293,31 +325,34 @@ const AdminDashboard = () => {
 
               {/* --- USERS TAB --- */}
               {activeTab === 'users' && (
-                <div className="bg-white rounded-xl shadow overflow-hidden">
-                  <div className="px-6 py-4 border-b">
-                    <h3 className="text-gray-700 font-bold">Approved Users Directory</h3>
-                  </div>
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                <div className="bg-white border border-surface-200 shadow-sm">
+                  <table className="min-w-full divide-y divide-surface-200">
+                    <thead className="bg-surface-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Institution</th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">ID</th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Full Name</th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Email Address</th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Role</th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Institution</th>
+                        <th className="px-6 py-3 text-right text-xs font-bold text-surface-600 uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-surface-200">
                       {users.map(u => (
                         <tr key={u.id}>
-                          <td className="px-6 py-4 text-sm text-gray-500">#{u.id}</td>
-                          <td className="px-6 py-4 text-sm font-medium text-gray-900">{u.name}</td>
-                          <td className="px-6 py-4 text-sm text-gray-500">{u.email}</td>
-                          <td className="px-6 py-4 text-sm"><span className={`px-2 py-1 rounded-full text-xs font-semibold ${u.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : u.role === 'TEACHER' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>{u.role}</span></td>
-                          <td className="px-6 py-4 text-sm text-gray-500">{u.institution || '-'}</td>
-                          <td className="px-6 py-4 text-right text-sm">
-                            <button onClick={() => handleDeleteUser(u.id)} className="text-red-600 hover:text-red-900">Delete</button>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-500">#{u.id}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-surface-900">{u.name}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-600">{u.email}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            <span className={`px-2 py-1 text-xs font-bold uppercase tracking-wide border ${u.role === 'ADMIN' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                              u.role === 'TEACHER' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-green-50 text-green-700 border-green-200'
+                              }`}>
+                              {u.role}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-600">{u.institution || '-'}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                            <button onClick={() => handleDeleteUser(u.id)} className="text-red-700 hover:text-red-900 font-bold uppercase text-xs">Delete</button>
                           </td>
                         </tr>
                       ))}
@@ -330,31 +365,39 @@ const AdminDashboard = () => {
               {activeTab === 'questions' && (
                 <div>
                   <div className="flex justify-end mb-4">
-                    <button onClick={openCreateModal} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 shadow">+ Add Question</button>
+                    <button onClick={openCreateModal} className="px-4 py-2 bg-primary-700 text-white rounded-sm hover:bg-primary-800 text-sm font-bold uppercase tracking-wide shadow-sm">
+                      + Add New Question
+                    </button>
                   </div>
-                  <div className="bg-white rounded-xl shadow overflow-hidden">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
+                  <div className="bg-white border border-surface-200 shadow-sm">
+                    <table className="min-w-full divide-y divide-surface-200">
+                      <thead className="bg-surface-50">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Subject</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Topic</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Difficulty</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Question</th>
-                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">ID</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Subject</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Topic</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Difficulty</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Question Text</th>
+                          <th className="px-6 py-3 text-right text-xs font-bold text-surface-600 uppercase tracking-wider">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-200">
+                      <tbody className="bg-white divide-y divide-surface-200">
                         {questions.map(q => (
                           <tr key={q.id}>
-                            <td className="px-6 py-4 text-sm text-gray-500">#{q.id}</td>
-                            <td className="px-6 py-4 text-sm text-gray-900">{q.subject}</td>
-                            <td className="px-6 py-4 text-sm text-gray-500">{q.topic || '-'}</td>
-                            <td className="px-6 py-4 text-sm"><span className={`px-2 py-1 rounded full text-xs ${q.difficulty === 'Hard' ? 'bg-red-100 text-red-800' : q.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>{q.difficulty}</span></td>
-                            <td className="px-6 py-4 text-sm text-gray-600 max-w-md truncate">{q.content}</td>
-                            <td className="px-6 py-4 text-right text-sm space-x-2">
-                              <button onClick={() => openEditModal(q)} className="text-blue-600 hover:text-blue-900">Edit</button>
-                              <button onClick={() => handleDeleteQuestion(q.id)} className="text-red-600 hover:text-red-900">Delete</button>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-500">#{q.id}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-900">{q.subject}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-600">{q.topic || '-'}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                              <span className={`px-2 py-1 text-xs font-bold uppercase tracking-wide ${q.difficulty === 'Hard' ? 'text-red-700 bg-red-50 border border-red-200' :
+                                q.difficulty === 'Medium' ? 'text-yellow-700 bg-yellow-50 border border-yellow-200' : 'text-green-700 bg-green-50 border border-green-200'
+                                }`}>
+                                {q.difficulty}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-surface-600 max-w-md truncate">{q.content}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                              <button onClick={() => openEditModal(q)} className="text-primary-700 hover:text-primary-900 font-bold uppercase text-xs mr-3">Edit</button>
+                              <button onClick={() => handleDeleteQuestion(q.id)} className="text-red-700 hover:text-red-900 font-bold uppercase text-xs">Delete</button>
                             </td>
                           </tr>
                         ))}

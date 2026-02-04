@@ -8,10 +8,13 @@ import MainLayout from './layout/MainLayout';
 const AppWithLayout = () => {
   const location = useLocation();
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/register';
+  const isExamRoute = location.pathname.startsWith('/student/exam');
 
-  return isAuthRoute ? (
-    <AppRoutes />
-  ) : (
+  if (isAuthRoute || isExamRoute) {
+    return <AppRoutes />;
+  }
+
+  return (
     <MainLayout>
       <AppRoutes />
     </MainLayout>
@@ -20,7 +23,7 @@ const AppWithLayout = () => {
 
 function App() {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <AppWithLayout />
       </AuthProvider>

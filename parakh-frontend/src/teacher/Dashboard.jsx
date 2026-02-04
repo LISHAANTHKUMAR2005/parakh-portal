@@ -2,23 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-// --- Modals ---
+// --- Modals (Government Style) ---
 
 const CreateClassModal = ({ isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState({ name: '', subject: '', description: '' });
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h3 className="text-xl font-bold mb-4">Create New Class</h3>
-        <div className="space-y-4">
-          <input className="w-full p-2 border rounded" placeholder="Class Name (e.g. Class 10-A)" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
-          <input className="w-full p-2 border rounded" placeholder="Subject" value={formData.subject} onChange={e => setFormData({ ...formData, subject: e.target.value })} />
-          <textarea className="w-full p-2 border rounded" placeholder="Description" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
+    <div className="fixed inset-0 bg-surface-900/50 flex items-center justify-center z-50">
+      <div className="bg-white border border-surface-300 shadow-lg p-6 w-full max-w-md">
+        <div className="border-b border-surface-200 pb-2 mb-4">
+          <h3 className="text-lg font-bold text-primary-900 uppercase">Create New Class</h3>
         </div>
-        <div className="mt-6 flex justify-end space-x-3">
-          <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
-          <button onClick={() => onSave(formData)} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Create Class</button>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-surface-600 mb-1 uppercase">Class Name</label>
+            <input className="w-full p-2 border border-surface-300 focus:border-primary-600 outline-none text-sm" placeholder="e.g. Class 10-A" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-surface-600 mb-1 uppercase">Subject</label>
+            <input className="w-full p-2 border border-surface-300 focus:border-primary-600 outline-none text-sm" placeholder="e.g. Science" value={formData.subject} onChange={e => setFormData({ ...formData, subject: e.target.value })} />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-surface-600 mb-1 uppercase">Description</label>
+            <textarea className="w-full p-2 border border-surface-300 focus:border-primary-600 outline-none text-sm" rows="3" placeholder="Enter class description..." value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
+          </div>
+        </div>
+        <div className="mt-6 flex justify-end space-x-3 pt-4 border-t border-surface-200">
+          <button onClick={onClose} className="px-4 py-2 border border-surface-300 text-surface-700 bg-surface-50 hover:bg-surface-100 text-sm font-bold uppercase">Cancel</button>
+          <button onClick={() => onSave(formData)} className="px-4 py-2 bg-primary-700 text-white hover:bg-primary-800 text-sm font-bold uppercase">Create Class</button>
         </div>
       </div>
     </div>
@@ -29,13 +40,18 @@ const AddStudentModal = ({ isOpen, onClose, onSave }) => {
   const [email, setEmail] = useState('');
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h3 className="text-xl font-bold mb-4">Add Student to Class</h3>
-        <input className="w-full p-2 border rounded mb-4" placeholder="Student Email" value={email} onChange={e => setEmail(e.target.value)} />
-        <div className="flex justify-end space-x-3">
-          <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
-          <button onClick={() => onSave(email)} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Add Student</button>
+    <div className="fixed inset-0 bg-surface-900/50 flex items-center justify-center z-50">
+      <div className="bg-white border border-surface-300 shadow-lg p-6 w-full max-w-md">
+        <div className="border-b border-surface-200 pb-2 mb-4">
+          <h3 className="text-lg font-bold text-primary-900 uppercase">Add Student</h3>
+        </div>
+        <div className="mb-4">
+          <label className="block text-xs font-bold text-surface-600 mb-1 uppercase">Student Email ID</label>
+          <input className="w-full p-2 border border-surface-300 focus:border-primary-600 outline-none text-sm" placeholder="student@example.com" value={email} onChange={e => setEmail(e.target.value)} />
+        </div>
+        <div className="flex justify-end space-x-3 pt-4 border-t border-surface-200">
+          <button onClick={onClose} className="px-4 py-2 border border-surface-300 text-surface-700 bg-surface-50 hover:bg-surface-100 text-sm font-bold uppercase">Cancel</button>
+          <button onClick={() => onSave(email)} className="px-4 py-2 bg-primary-700 text-white hover:bg-primary-800 text-sm font-bold uppercase">Add Student</button>
         </div>
       </div>
     </div>
@@ -47,7 +63,7 @@ const CreateAssessmentModal = ({ isOpen, onClose, onSave, classes }) => {
   const [formData, setFormData] = useState({
     title: '', classroomId: '', durationMinutes: 60, type: 'TOPIC',
     subject: 'Science', topic: '', difficulty: 'Medium', questionCount: 10,
-    pdfUrl: '' // In real app, this would be file upload
+    pdfUrl: ''
   });
 
   if (!isOpen) return null;
@@ -57,66 +73,83 @@ const CreateAssessmentModal = ({ isOpen, onClose, onSave, classes }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <h3 className="text-xl font-bold mb-4">Create New Assessment</h3>
+    <div className="fixed inset-0 bg-surface-900/50 flex items-center justify-center z-50">
+      <div className="bg-white border border-surface-300 shadow-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="border-b border-surface-200 pb-2 mb-4">
+          <h3 className="text-lg font-bold text-primary-900 uppercase">Create New Assessment</h3>
+        </div>
 
         {step === 1 && (
           <div className="space-y-4">
-            <h4 className="font-semibold text-gray-700 border-b pb-2">Step 1: Basic Info</h4>
-            <input className="w-full p-2 border rounded" placeholder="Assessment Title" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
-            <select className="w-full p-2 border rounded" value={formData.classroomId} onChange={e => setFormData({ ...formData, classroomId: e.target.value })}>
-              <option value="">Select Class</option>
-              {classes.map(c => <option key={c.id} value={c.id}>{c.name} ({c.subject})</option>)}
-            </select>
-            <div className="flex items-center space-x-2">
-              <label className="w-24 text-sm font-medium">Duration (mins):</label>
-              <input type="number" className="p-2 border rounded w-24" value={formData.durationMinutes} onChange={e => setFormData({ ...formData, durationMinutes: e.target.value })} />
+            <h4 className="text-sm font-bold text-surface-800 uppercase border-l-4 border-accent-400 pl-2">Step 1: Basic Information</h4>
+            <div>
+              <label className="block text-xs font-bold text-surface-600 mb-1 uppercase">Assessment Title</label>
+              <input className="w-full p-2 border border-surface-300 focus:border-primary-600 outline-none text-sm" placeholder="e.g. Unit Test 1" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
             </div>
-            <div className="flex justify-end mt-4">
-              <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded mr-2">Cancel</button>
-              <button onClick={() => setStep(2)} disabled={!formData.title || !formData.classroomId} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50">Next</button>
+            <div>
+              <label className="block text-xs font-bold text-surface-600 mb-1 uppercase">Class</label>
+              <select className="w-full p-2 border border-surface-300 focus:border-primary-600 outline-none text-sm bg-white" value={formData.classroomId} onChange={e => setFormData({ ...formData, classroomId: e.target.value })}>
+                <option value="">Select Class</option>
+                {classes.map(c => <option key={c.id} value={c.id}>{c.name} ({c.subject})</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-surface-600 mb-1 uppercase">Duration (Minutes)</label>
+              <input type="number" className="w-full p-2 border border-surface-300 focus:border-primary-600 outline-none text-sm" value={formData.durationMinutes} onChange={e => setFormData({ ...formData, durationMinutes: e.target.value })} />
+            </div>
+            <div className="flex justify-end mt-4 pt-4 border-t border-surface-200">
+              <button onClick={onClose} className="px-4 py-2 border border-surface-300 text-surface-700 bg-surface-50 hover:bg-surface-100 text-sm font-bold uppercase mr-3">Cancel</button>
+              <button onClick={() => setStep(2)} disabled={!formData.title || !formData.classroomId} className="px-4 py-2 bg-primary-700 text-white hover:bg-primary-800 disabled:bg-surface-300 text-sm font-bold uppercase">Next</button>
             </div>
           </div>
         )}
 
         {step === 2 && (
           <div className="space-y-4">
-            <h4 className="font-semibold text-gray-700 border-b pb-2">Step 2: Configuration</h4>
+            <h4 className="text-sm font-bold text-surface-800 uppercase border-l-4 border-accent-400 pl-2">Step 2: Configuration</h4>
             <div className="flex space-x-4 mb-4">
-              <button onClick={() => setFormData({ ...formData, type: 'TOPIC' })} className={`flex-1 py-2 rounded border ${formData.type === 'TOPIC' ? 'bg-blue-50 border-blue-500 text-blue-700 font-bold' : 'hover:bg-gray-50'}`}>Topic Based</button>
-              <button onClick={() => setFormData({ ...formData, type: 'PDF' })} className={`flex-1 py-2 rounded border ${formData.type === 'PDF' ? 'bg-blue-50 border-blue-500 text-blue-700 font-bold' : 'hover:bg-gray-50'}`}>PDF Upload</button>
+              <button onClick={() => setFormData({ ...formData, type: 'TOPIC' })} className={`flex-1 py-2 border text-sm font-bold uppercase ${formData.type === 'TOPIC' ? 'bg-primary-50 border-primary-600 text-primary-800' : 'bg-white border-surface-300 text-surface-600'}`}>Topic Based</button>
+              <button onClick={() => setFormData({ ...formData, type: 'PDF' })} className={`flex-1 py-2 border text-sm font-bold uppercase ${formData.type === 'PDF' ? 'bg-primary-50 border-primary-600 text-primary-800' : 'bg-white border-surface-300 text-surface-600'}`}>PDF Upload</button>
             </div>
 
             {formData.type === 'TOPIC' ? (
-              <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
-                <input className="w-full p-2 border rounded" placeholder="Subject" value={formData.subject} onChange={e => setFormData({ ...formData, subject: e.target.value })} />
-                <input className="w-full p-2 border rounded" placeholder="Topic (e.g. Thermodynamics)" value={formData.topic} onChange={e => setFormData({ ...formData, topic: e.target.value })} />
+              <div className="space-y-4 p-4 border border-surface-200 bg-surface-50">
+                <div>
+                  <label className="block text-xs font-bold text-surface-600 mb-1 uppercase">Subject</label>
+                  <input className="w-full p-2 border border-surface-300 focus:border-primary-600 outline-none text-sm" placeholder="Subject" value={formData.subject} onChange={e => setFormData({ ...formData, subject: e.target.value })} />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-surface-600 mb-1 uppercase">Topic</label>
+                  <input className="w-full p-2 border border-surface-300 focus:border-primary-600 outline-none text-sm" placeholder="e.g. Algebra" value={formData.topic} onChange={e => setFormData({ ...formData, topic: e.target.value })} />
+                </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <select className="p-2 border rounded" value={formData.difficulty} onChange={e => setFormData({ ...formData, difficulty: e.target.value })}>
-                    <option value="Easy">Easy</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Hard">Hard</option>
-                  </select>
-                  <div className="flex items-center space-x-2">
-                    <label className="text-sm">Questions:</label>
-                    <input type="number" className="p-2 border rounded w-full" value={formData.questionCount} onChange={e => setFormData({ ...formData, questionCount: e.target.value })} />
+                  <div>
+                    <label className="block text-xs font-bold text-surface-600 mb-1 uppercase">Difficulty</label>
+                    <select className="w-full p-2 border border-surface-300 focus:border-primary-600 outline-none text-sm bg-white" value={formData.difficulty} onChange={e => setFormData({ ...formData, difficulty: e.target.value })}>
+                      <option value="Easy">Easy</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Hard">Hard</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-surface-600 mb-1 uppercase">No. of Questions</label>
+                    <input type="number" className="w-full p-2 border border-surface-300 focus:border-primary-600 outline-none text-sm" value={formData.questionCount} onChange={e => setFormData({ ...formData, questionCount: e.target.value })} />
                   </div>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">Questions will be auto-generated from the question bank based on these criteria.</p>
+                <p className="text-xs text-surface-500 mt-2 italic">* Questions will be automatically selected from the question bank.</p>
               </div>
             ) : (
-              <div className="space-y-3 bg-gray-50 p-4 rounded-lg text-center border-2 border-dashed border-gray-300">
-                <div className="py-8">
-                  <p className="text-gray-600 font-medium">📄 Upload Question Paper PDF</p>
-                  <p className="text-xs text-blue-500 mt-2">AI Parking Lot: Content will be parsed later</p>
-                </div>
+              <div className="space-y-3 bg-surface-50 p-8 border border-dashed border-surface-300 flex flex-col items-center justify-center">
+                <svg className="w-12 h-12 text-surface-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                <p className="text-surface-700 font-medium">Upload Question Paper (PDF)</p>
+                <p className="text-xs text-surface-500">Official document format required</p>
+                <button className="mt-2 px-4 py-2 bg-surface-200 hover:bg-surface-300 text-surface-800 text-xs font-bold uppercase">Choose File</button>
               </div>
             )}
 
-            <div className="flex justify-end mt-6">
-              <button onClick={() => setStep(1)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded mr-2">Back</button>
-              <button onClick={handleSubmit} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Create Assessment</button>
+            <div className="flex justify-end mt-6 pt-4 border-t border-surface-200">
+              <button onClick={() => setStep(1)} className="px-4 py-2 border border-surface-300 text-surface-700 bg-surface-50 hover:bg-surface-100 text-sm font-bold uppercase mr-3">Back</button>
+              <button onClick={handleSubmit} className="px-4 py-2 bg-primary-700 text-white hover:bg-primary-800 text-sm font-bold uppercase">Create Assessment</button>
             </div>
           </div>
         )}
@@ -155,7 +188,6 @@ const TeacherDashboard = () => {
         const res = await fetch('http://localhost:8081/api/teacher/classes', { headers });
         if (res.ok) setClasses(await res.json());
       } else if (activeTab === 'assessments') {
-        // Fetch classes too for the dropdown
         const resClasses = await fetch('http://localhost:8081/api/teacher/classes', { headers });
         if (resClasses.ok) setClasses(await resClasses.json());
 
@@ -209,89 +241,104 @@ const TeacherDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-full bg-accent-100 flex font-sans">
       {/* Sidebar */}
-      <div className="w-64 bg-emerald-900 text-white flex flex-col">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold">TEACHER PORTAL</h2>
+      <div className="w-64 bg-primary-900 text-white flex flex-col flex-shrink-0">
+        <div className="p-5 border-b border-primary-800 bg-primary-950">
+          <h2 className="text-xl font-bold tracking-tight text-white mb-1">PARAKH</h2>
+          <p className="text-xs text-primary-200 uppercase tracking-widest">Academic Portal</p>
         </div>
-        <nav className="flex-1 px-4 space-y-2">
-          <button onClick={() => setActiveTab('classes')} className={`w-full text-left px-4 py-3 rounded-lg ${activeTab === 'classes' ? 'bg-emerald-600' : 'hover:bg-emerald-800'}`}>🏫 My Classes</button>
-          <button onClick={() => setActiveTab('assessments')} className={`w-full text-left px-4 py-3 rounded-lg ${activeTab === 'assessments' ? 'bg-emerald-600' : 'hover:bg-emerald-800'}`}>📝 Assessments</button>
+        <nav className="flex-1 px-3 py-4 space-y-1">
+          <button onClick={() => setActiveTab('classes')} className={`w-full text-left px-4 py-2.5 text-sm font-medium border-l-4 ${activeTab === 'classes' ? 'bg-primary-800 border-white text-white' : 'border-transparent text-primary-100 hover:bg-primary-800 hover:text-white'}`}>My Classes</button>
+          <button onClick={() => setActiveTab('assessments')} className={`w-full text-left px-4 py-2.5 text-sm font-medium border-l-4 ${activeTab === 'assessments' ? 'bg-primary-800 border-white text-white' : 'border-transparent text-primary-100 hover:bg-primary-800 hover:text-white'}`}>Assessments</button>
+          <button onClick={() => setActiveTab('reports')} className={`w-full text-left px-4 py-2.5 text-sm font-medium border-l-4 ${activeTab === 'reports' ? 'bg-primary-800 border-white text-white' : 'border-transparent text-primary-100 hover:bg-primary-800 hover:text-white'}`}>Student Performance</button>
         </nav>
-        <div className="p-4 border-t border-emerald-800">
-          <div className="mb-4">
-            <p className="font-bold">{user?.name}</p>
-            <p className="text-xs opacity-70">Teacher</p>
+        <div className="p-4 border-t border-primary-800 bg-primary-950">
+          <div className="mb-3">
+            <p className="text-sm font-semibold text-white">{user?.name}</p>
+            <p className="text-xs text-primary-300">Teacher Account</p>
           </div>
-          <button onClick={() => { logout(); navigate('/login'); }} className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-medium transition-colors">Sign Out</button>
+          <button onClick={() => { logout(); navigate('/login'); }} className="w-full px-3 py-2 bg-red-700 hover:bg-red-800 text-white text-xs font-bold uppercase tracking-wide rounded-sm transition-colors text-center">Sign Out</button>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto p-8">
-        <header className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-800 uppercase">{activeTab}</h1>
-          {activeTab === 'classes' && <button onClick={() => setIsClassModalOpen(true)} className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700">+ New Class</button>}
-          {activeTab === 'assessments' && <button onClick={() => setIsAssessmentModalOpen(true)} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">+ New Assessment</button>}
+      <div className="flex-1 overflow-auto">
+        <header className="bg-white shadow-sm border-b border-surface-200 py-5 px-8 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-primary-900 uppercase tracking-tight">{activeTab === 'classes' ? 'Classroom Management' : activeTab === 'assessments' ? 'Examination Control' : 'Reports & Analytics'}</h1>
+          {activeTab === 'classes' && <button onClick={() => setIsClassModalOpen(true)} className="bg-primary-700 text-white px-4 py-2 rounded-sm text-sm font-bold uppercase hover:bg-primary-800">+ New Class</button>}
+          {activeTab === 'assessments' && <button onClick={() => setIsAssessmentModalOpen(true)} className="bg-primary-700 text-white px-4 py-2 rounded-sm text-sm font-bold uppercase hover:bg-primary-800">+ New Assessment</button>}
         </header>
 
-        {loading ? (
-          <div className="flex justify-center h-64 items-center"><div className="animate-spin text-4xl text-emerald-600">🌀</div></div>
-        ) : (
-          <>
-            {activeTab === 'classes' && (
-              <>
-                {classes.length === 0 ? <p className="text-gray-500 italic">No classes found. Create one to get started.</p> : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {classes.map(c => (
-                      <div key={c.id} className="bg-white rounded-xl shadow-lg border-l-4 border-emerald-500 p-6 hover:shadow-xl transition-shadow">
-                        <h3 className="text-xl font-bold text-gray-800">{c.name}</h3>
-                        <p className="text-emerald-700 font-medium mb-2">{c.subject}</p>
-                        <p className="text-gray-500 text-sm mb-4">{c.description || 'No description'}</p>
-                        <div className="border-t pt-4 flex justify-between items-center">
-                          <span className="text-xs text-gray-500">{c.students ? c.students.length : 0} Students</span>
-                          <button onClick={() => openAddStudent(c.id)} className="text-sm text-blue-600 hover:text-blue-800 font-medium">+ Add Student</button>
+        <main className="p-8">
+          {loading ? (
+            <div className="flex justify-center items-center h-40">
+              <span className="text-primary-600 font-medium">Loading data...</span>
+            </div>
+          ) : (
+            <>
+              {activeTab === 'classes' && (
+                <>
+                  {classes.length === 0 ? <div className="bg-white p-6 border border-surface-200 text-surface-500 text-center italic">No classes found. Create a class to proceed.</div> : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {classes.map(c => (
+                        <div key={c.id} className="bg-white border border-surface-200 shadow-sm p-5 hover:shadow-md transition-shadow">
+                          <div className="border-b border-surface-100 pb-3 mb-3">
+                            <h3 className="text-lg font-bold text-primary-900">{c.name}</h3>
+                            <p className="text-xs font-bold text-surface-500 uppercase tracking-wide">{c.subject}</p>
+                          </div>
+                          <p className="text-surface-600 text-sm mb-4 min-h-[40px]">{c.description || 'No description provided.'}</p>
+                          <div className="bg-surface-50 p-3 flex justify-between items-center border border-surface-100">
+                            <span className="text-xs font-bold text-surface-600 uppercase">{c.students ? c.students.length : 0} Enrolled</span>
+                            <button onClick={() => openAddStudent(c.id)} className="text-xs text-primary-700 hover:text-primary-900 font-bold uppercase">+ Add Student</button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
 
-            {activeTab === 'assessments' && (
-              <>
-                {assessments.length === 0 ? <p className="text-gray-500 italic">No assessments created yet.</p> : (
-                  <div className="bg-white rounded-xl shadow overflow-hidden">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Class</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {assessments.map(a => (
-                          <tr key={a.id}>
-                            <td className="px-6 py-4 font-medium text-gray-900">{a.title}</td>
-                            <td className="px-6 py-4 text-gray-600">{a.classroom?.name}</td>
-                            <td className="px-6 py-4"><span className={`px-2 py-1 rounded text-xs font-bold ${a.type === 'TOPIC' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'}`}>{a.type}</span></td>
-                            <td className="px-6 py-4"><span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">{a.status}</span></td>
-                            <td className="px-6 py-4 text-sm text-gray-500">{new Date(a.createdAt).toLocaleDateString()}</td>
+              {activeTab === 'assessments' && (
+                <>
+                  {assessments.length === 0 ? <div className="bg-white p-6 border border-surface-200 text-surface-500 text-center italic">No assessments created.</div> : (
+                    <div className="bg-white border border-surface-200 shadow-sm">
+                      <table className="min-w-full divide-y divide-surface-200">
+                        <thead className="bg-surface-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Assessment Title</th>
+                            <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Class</th>
+                            <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Type</th>
+                            <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Status</th>
+                            <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Created Date</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </>
-            )}
-          </>
-        )}
+                        </thead>
+                        <tbody className="bg-white divide-y divide-surface-200">
+                          {assessments.map(a => (
+                            <tr key={a.id}>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-primary-900">{a.title}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-600">{a.classroom?.name}</td>
+                              <td className="px-6 py-4 whitespace-nowrap"><span className={`px-2 py-1 text-xs font-bold uppercase border ${a.type === 'TOPIC' ? 'bg-blue-50 text-blue-800 border-blue-200' : 'bg-orange-50 text-orange-800 border-orange-200'}`}>{a.type}</span></td>
+                              <td className="px-6 py-4 whitespace-nowrap"><span className="px-2 py-1 bg-green-50 text-green-800 border border-green-200 text-xs font-bold uppercase">Active</span></td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-500">{new Date(a.createdAt).toLocaleDateString()}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {activeTab === 'reports' && (
+                <div className="bg-white p-12 border border-surface-200 text-center">
+                  <h3 className="text-xl font-bold text-surface-400 uppercase">Performance Reports Module</h3>
+                  <p className="text-surface-500 mt-2">Analytical reports will be displayed here.</p>
+                </div>
+              )}
+            </>
+          )}
+        </main>
       </div>
 
       <CreateClassModal isOpen={isClassModalOpen} onClose={() => setIsClassModalOpen(false)} onSave={handleCreateClass} />

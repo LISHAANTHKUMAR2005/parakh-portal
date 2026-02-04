@@ -22,7 +22,7 @@ public class User {
     private String role; // ADMIN, STUDENT, TEACHER
 
     @Column(nullable = false)
-    private String status = "PENDING"; // PENDING, APPROVED, REJECTED
+    private String status = "APPROVED"; // PENDING, APPROVED, REJECTED
 
     @Column(nullable = true)
     private String institution;
@@ -36,7 +36,7 @@ public class User {
         this.name = name;
         this.role = role;
         this.institution = institution;
-        this.status = "PENDING";
+        this.status = "APPROVED"; // Auto-approve new registrations
     }
 
     public Long getId() {

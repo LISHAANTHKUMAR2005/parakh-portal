@@ -2,6 +2,7 @@ com\parakh\backend\config\JwtAuthenticationFilter.class
 com\parakh\backend\config\SecurityConfig.class
 com\parakh\backend\service\UserService.class
 com\parakh\backend\repository\StudentResponseRepository.class
+com\parakh\backend\controller\StudentController.class
 com\parakh\backend\model\Assessment.class
 com\parakh\backend\repository\UserRepository.class
 com\parakh\backend\repository\QuestionRepository.class

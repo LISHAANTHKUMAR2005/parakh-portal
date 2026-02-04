@@ -95,10 +95,34 @@ export const AuthProvider = ({ children }) => {
     navigate('/login', { replace: true });
   };
 
+  const register = async (userData) => {
+    try {
+      const response = await fetch('http://localhost:8081/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (response.ok) {
+        const result = await response.text();
+        return { success: true, message: result };
+      } else {
+        const errorText = await response.text();
+        return { success: false, error: errorText || 'Registration failed' };
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      return { success: false, error: 'Network error. Please try again.' };
+    }
+  };
+
   const value = {
     user,
     login,
     logout,
+    register,
     loading
   };
 

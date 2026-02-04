@@ -4,9 +4,9 @@ import Navbar from './Navbar';
 
 const MainLayout = ({ children }) => {
   return (
-    <div className="min-h-screen bg-surface-50">
+    <div className="h-screen flex flex-col bg-surface-50 overflow-hidden font-sans">
       <Navbar />
-      <main className="w-full">
+      <main className="flex-1 w-full h-full overflow-hidden relative">
         {children}
       </main>
     </div>

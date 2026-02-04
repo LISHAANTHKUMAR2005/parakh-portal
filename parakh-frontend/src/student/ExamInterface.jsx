@@ -83,107 +83,156 @@ const ExamInterface = () => {
         }
     };
 
-    if (loading) return <div className="h-screen flex items-center justify-center text-2xl">Loading Exam...</div>;
+    if (loading) return <div className="h-screen flex items-center justify-center text-2xl font-bold text-primary-700">LOADING ASSESSMENT RESOURCES...</div>;
 
-    if (questions.length === 0) return <div className="h-screen flex items-center justify-center">No questions found for this exam.</div>;
+    if (questions.length === 0) return <div className="h-screen flex items-center justify-center font-bold text-surface-600">NO QUESTIONS FOUND FOR THIS ASSESSMENT.</div>;
 
     const q = questions[currentQuestion];
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col">
+        <div className="min-h-screen bg-surface-100 flex flex-col font-sans">
             {/* Header */}
-            <header className="bg-white px-8 py-4 shadow flex justify-between items-center z-10">
-                <h1 className="text-xl font-bold text-gray-800">Parakh Secure Exam Browser</h1>
-                <div className={`px-4 py-2 rounded font-mono font-bold text-xl ${timeLeft < 300 ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-700'}`}>
-                    {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+            <header className="bg-primary-900 border-b-4 border-accent-400 px-6 py-3 flex justify-between items-center z-10 shadow-sm">
+                <div>
+                    <h1 className="text-xl font-bold text-white tracking-widest uppercase">PARAKH ASSESSMENT SYSTEM</h1>
+                    <p className="text-xs text-primary-200">Candidate ID: {user?.email}</p>
+                </div>
+                <div className="flex items-center space-x-4">
+                    <div className="text-right">
+                        <p className="text-xs text-primary-200 uppercase">Time Remaining</p>
+                        <div className={`font-mono font-bold text-2xl ${timeLeft < 300 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
+                            {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+                        </div>
+                    </div>
                 </div>
             </header>
 
             <div className="flex-1 flex overflow-hidden">
-                {/* Sidebar Navigation */}
-                <div className="w-64 bg-white border-r border-gray-200 p-6 overflow-y-auto">
-                    <h3 className="font-bold text-gray-500 mb-4 uppercase text-sm">Question Palette</h3>
-                    <div className="grid grid-cols-4 gap-2">
-                        {questions.map((_, idx) => (
-                            <button
-                                key={idx}
-                                onClick={() => setCurrentQuestion(idx)}
-                                className={`h-10 w-10 rounded-lg font-bold text-sm transition-colors ${currentQuestion === idx ? 'ring-2 ring-blue-500 ring-offset-2' : ''
-                                    } ${answers[questions[idx].id] ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                                    }`}
-                            >
-                                {idx + 1}
-                            </button>
-                        ))}
-                    </div>
-
-                    <div className="mt-8 border-t pt-6">
-                        <div className="flex items-center mb-2">
-                            <div className="w-4 h-4 bg-blue-600 rounded mr-2"></div>
-                            <span className="text-sm text-gray-600">Answered</span>
-                        </div>
-                        <div className="flex items-center">
-                            <div className="w-4 h-4 bg-gray-200 rounded mr-2"></div>
-                            <span className="text-sm text-gray-600">Not Answered</span>
-                        </div>
-                    </div>
-                </div>
-
                 {/* Question Area */}
-                <main className="flex-1 p-8 overflow-y-auto bg-gray-50">
-                    <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-8 min-h-[500px] flex flex-col">
-                        <div className="flex justify-between text-gray-500 text-sm mb-4 font-mono">
-                            <span>Question {currentQuestion + 1} of {questions.length}</span>
-                            <span>ID: {q.id}</span>
+                <main className="flex-1 p-6 overflow-y-auto bg-surface-50 flex flex-col relative">
+                    <div className="bg-white border border-surface-300 shadow-sm flex-1 flex flex-col p-8">
+                        <div className="flex justify-between items-center border-b-2 border-surface-200 pb-4 mb-6">
+                            <span className="text-lg font-bold text-primary-800 uppercase">Question No. {currentQuestion + 1}</span>
+                            <span className="text-xs font-bold text-surface-500 bg-surface-100 px-2 py-1 border border-surface-200">marks: 1.0</span>
                         </div>
 
-                        <h2 className="text-xl font-medium text-gray-900 mb-8 leading-relaxed">
+                        <h2 className="text-xl font-medium text-surface-900 mb-8 leading-relaxed">
                             {q.content}
                         </h2>
 
-                        <div className="space-y-4 flex-1">
+                        <div className="space-y-3 flex-1">
                             {['A', 'B', 'C', 'D'].map((opt) => (
-                                <button
+                                <div
                                     key={opt}
                                     onClick={() => handleOptionSelect(q.id, opt)}
-                                    className={`w-full text-left p-4 rounded-lg border-2 transition-all ${answers[q.id] === opt
-                                        ? 'border-blue-500 bg-blue-50 text-blue-800'
-                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                    className={`flex items-start p-4 border cursor-pointer group transition-colors ${answers[q.id] === opt
+                                            ? 'bg-blue-50 border-primary-600'
+                                            : 'bg-white border-surface-300 hover:bg-surface-50 hover:border-surface-400'
                                         }`}
                                 >
-                                    <span className="font-bold mr-4">{opt}.</span>
-                                    {q[`option${opt}`]}
-                                </button>
+                                    <div className={`flex items-center justify-center w-6 h-6 border rounded-full mr-4 flex-shrink-0 ${answers[q.id] === opt
+                                            ? 'border-primary-600 bg-primary-600 text-white'
+                                            : 'border-surface-400 text-surface-500 group-hover:border-surface-600'
+                                        }`}>
+                                        <div className={`w-2.5 h-2.5 rounded-full ${answers[q.id] === opt ? 'bg-white' : 'hidden'}`}></div>
+                                    </div>
+                                    <div>
+                                        <span className="font-bold mr-2 text-surface-700">{opt}.</span>
+                                        <span className="text-surface-800">{q[`option${opt}`]}</span>
+                                    </div>
+                                </div>
                             ))}
                         </div>
+                    </div>
 
-                        <div className="flex justify-between mt-8 pt-6 border-t">
+                    <div className="mt-4 flex justify-between items-center bg-white p-4 border border-surface-300 shadow-sm">
+                        <button
+                            disabled={currentQuestion === 0}
+                            onClick={() => setCurrentQuestion(prev => prev - 1)}
+                            className="px-6 py-2 border border-surface-300 bg-surface-100 text-surface-700 font-bold uppercase text-sm hover:bg-surface-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            &larr; Previous
+                        </button>
+
+                        <div className="space-x-4">
                             <button
-                                disabled={currentQuestion === 0}
-                                onClick={() => setCurrentQuestion(prev => prev - 1)}
-                                className="px-6 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50"
+                                className="px-6 py-2 border border-yellow-500 text-yellow-700 font-bold uppercase text-sm hover:bg-yellow-50"
+                                onClick={() => {/* Placeholder for Mark for Review */ }}
                             >
-                                Previous
+                                Mark for Review
                             </button>
-
                             {currentQuestion < questions.length - 1 ? (
                                 <button
                                     onClick={() => setCurrentQuestion(prev => prev + 1)}
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                    className="px-6 py-2 bg-primary-700 text-white font-bold uppercase text-sm hover:bg-primary-800 border border-transparent"
                                 >
-                                    Next Question
+                                    Save & Next &rarr;
                                 </button>
                             ) : (
                                 <button
                                     onClick={handleSubmit}
-                                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold"
+                                    className="px-6 py-2 bg-green-700 text-white font-bold uppercase text-sm hover:bg-green-800 border border-transparent shadow-sm"
                                 >
-                                    Submit Exam
+                                    Submit Final Response
                                 </button>
                             )}
                         </div>
                     </div>
                 </main>
+
+                {/* Sidebar Navigation */}
+                <div className="w-80 bg-white border-l border-surface-300 flex flex-col">
+                    <div className="p-4 bg-surface-50 border-b border-surface-200">
+                        <div className="flex items-center justify-center">
+                            <div className="w-16 h-16 bg-surface-200 rounded-full flex items-center justify-center text-surface-400 font-bold text-2xl border mb-2">
+                                {user?.name ? user.name.charAt(0) : 'U'}
+                            </div>
+                        </div>
+                        <p className="text-center font-bold text-surface-800">{user?.name}</p>
+                    </div>
+
+                    <div className="p-4 flex-1 overflow-y-auto">
+                        <h3 className="font-bold text-surface-700 mb-4 uppercase text-xs border-b border-surface-200 pb-2">Question Palette</h3>
+                        <div className="grid grid-cols-4 gap-3">
+                            {questions.map((_, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setCurrentQuestion(idx)}
+                                    className={`h-10 w-10 flex items-center justify-center text-sm font-bold border transition-colors ${currentQuestion === idx
+                                            ? 'border-primary-600 ring-1 ring-primary-600 z-10'
+                                            : 'border-surface-300'
+                                        } ${answers[questions[idx].id]
+                                            ? 'bg-green-600 text-white border-green-700'
+                                            : 'bg-surface-50 text-surface-700 hover:bg-surface-100'
+                                        }`}
+                                >
+                                    {idx + 1}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="mt-8 space-y-3">
+                            <div className="flex items-center">
+                                <div className="w-6 h-6 bg-green-600 border border-green-700 flex items-center justify-center text-white text-xs font-bold mr-3">#</div>
+                                <span className="text-xs font-bold text-surface-600 uppercase">Answered</span>
+                            </div>
+                            <div className="flex items-center">
+                                <div className="w-6 h-6 bg-surface-50 border border-surface-300 flex items-center justify-center text-surface-700 text-xs font-bold mr-3">#</div>
+                                <span className="text-xs font-bold text-surface-600 uppercase">Not Visited / Skipped</span>
+                            </div>
+                            <div className="flex items-center">
+                                <div className="w-6 h-6 border-primary-600 ring-1 ring-primary-600 flex items-center justify-center text-primary-700 text-xs font-bold mr-3">#</div>
+                                <span className="text-xs font-bold text-surface-600 uppercase">Current Question</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-4 border-t border-surface-200 bg-surface-50">
+                        <button onClick={handleSubmit} className="w-full py-3 bg-red-700 text-white font-bold uppercase text-sm hover:bg-red-800 shadow-sm">
+                            Finish Exam
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     );

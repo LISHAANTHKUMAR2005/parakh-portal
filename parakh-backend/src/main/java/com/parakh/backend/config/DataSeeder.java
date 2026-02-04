@@ -16,42 +16,26 @@ public class DataSeeder {
     CommandLineRunner initDatabase(UserRepository userRepository, QuestionRepository questionRepository,
             PasswordEncoder passwordEncoder) {
         return args -> {
-            // Seed Users
+            // Seed Admin User
             if (userRepository.count() == 0) {
-                User student = new User("student@parakh.com", passwordEncoder.encode("password"), "Arjun Student",
-                        "STUDENT", "ABC College");
-                student.setStatus("APPROVED");
-                userRepository.save(student);
-
-                User teacher = new User("teacher@parakh.com", passwordEncoder.encode("password"), "Priya Teacher",
-                        "TEACHER", "ABC College");
-                teacher.setStatus("APPROVED");
-                userRepository.save(teacher);
-
-                User admin = new User("admin@parakh.com", passwordEncoder.encode("password"), "PR Admin", "ADMIN",
-                        "Parakh HQ");
+                // Official PARAKH Admin Account
+                User admin = new User("admin@parakh.gov.in", passwordEncoder.encode("admin123"),
+                        "System Administrator", "ADMIN", "PARAKH National Assessment Centre");
                 admin.setStatus("APPROVED");
                 userRepository.save(admin);
 
-                // Add users from original UserService for backward compatibility
-                User lishaanth = new User("lishaanthkumar05@gmail.com", passwordEncoder.encode("Lishaanth@2005"),
-                        "Lishaanth Kumar", "ADMIN", "Legacy Inst");
-                lishaanth.setStatus("APPROVED");
-                userRepository.save(lishaanth);
-
-                User rawUser = new User("user@gmail.com", passwordEncoder.encode("user@123"), "User", "STUDENT",
-                        "Legacy Inst");
-                rawUser.setStatus("APPROVED");
-                userRepository.save(rawUser);
-
-                System.out.println("Users seeded!");
+                System.out.println("✅ ========================================");
+                System.out.println("✅ PARAKH Admin Account Created!");
+                System.out.println("✅ Email: admin@parakh.gov.in");
+                System.out.println("✅ Password: admin123");
+                System.out.println("✅ ========================================");
             }
 
             // Seed Questions
             if (questionRepository.count() == 0) {
                 seedSubjectQuestions(questionRepository, "Science");
                 seedSubjectQuestions(questionRepository, "Mathematics");
-                System.out.println("Questions seeded!");
+                System.out.println("✅ Questions seeded!");
             }
         };
     }

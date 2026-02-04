@@ -34,16 +34,21 @@ public class AuthController {
         String email = payload.get("email");
         String password = payload.get("password");
 
+        System.out.println("Login attempt for: " + email);
+
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password));
 
             UserDetails userDetails = (UserDetails) authentication.getPrincipal(); // This might cast the User object
+            System.out.println("Authentication successful for: " + email);
 
             // Fetch the actual User entity to check status
             com.parakh.backend.model.User user = userRepository.findByEmail(email).orElseThrow();
+            System.out.println("User found: " + user.getEmail() + ", Status: " + user.getStatus());
 
             if (!"APPROVED".equals(user.getStatus())) {
+                System.out.println("User not approved: " + user.getStatus());
                 return ResponseEntity.status(403).body("Account not approved. Status: " + user.getStatus());
             }
 
@@ -60,6 +65,8 @@ public class AuthController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            System.out.println("Login failed for " + email + ": " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(401).body("Invalid credentials");
         }
     }

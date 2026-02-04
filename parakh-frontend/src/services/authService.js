@@ -12,18 +12,32 @@ export const login = async (email, password) => {
       body: JSON.stringify({ email, password }),
     });
 
-    const data = await response.json();
-
     if (response.ok) {
+      const data = await response.json();
       // Store user in localStorage
       localStorage.setItem('user', JSON.stringify(data));
       return { success: true, user: data };
     } else {
-      // If status is 403, it means not approved
-      if (response.status === 403) {
-        return { success: false, error: data || "Account pending approval." };
+      // Handle different error responses
+      let errorMessage = 'Invalid credentials. Please check your email and password.';
+      
+      try {
+        const errorData = await response.json();
+        if (typeof errorData === 'string') {
+          errorMessage = errorData;
+        } else if (errorData && errorData.error) {
+          errorMessage = errorData.error;
+        } else if (response.status === 403) {
+          errorMessage = errorData || "Account not approved. Please contact administrator.";
+        }
+      } catch (parseError) {
+        // If response is not JSON, use default error message
+        if (response.status === 403) {
+          errorMessage = "Account not approved. Please contact administrator.";
+        }
       }
-      return { success: false, error: typeof data === 'string' ? data : 'Login failed' };
+      
+      return { success: false, error: errorMessage };
     }
   } catch (error) {
     return { success: false, error: 'Network error. Please try again later.' };
