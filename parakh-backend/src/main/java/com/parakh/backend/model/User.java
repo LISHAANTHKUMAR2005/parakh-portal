@@ -3,7 +3,12 @@ package com.parakh.backend.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_user_email", columnList = "email", unique = true),
+        @Index(name = "idx_user_role", columnList = "role"),
+        @Index(name = "idx_user_status", columnList = "status"),
+        @Index(name = "idx_user_inst_id", columnList = "institutionId")
+})
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -12,6 +17,7 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @Column(nullable = false)
     private String password;
 
@@ -27,6 +33,12 @@ public class User {
     @Column(nullable = true)
     private String institution;
 
+    @Column(nullable = false, updatable = false)
+    private java.time.LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private java.time.LocalDateTime updatedAt;
+
     public User() {
     }
 
@@ -36,7 +48,18 @@ public class User {
         this.name = name;
         this.role = role;
         this.institution = institution;
-        this.status = "APPROVED"; // Auto-approve new registrations
+        this.status = "PENDING"; // Requires admin approval
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = java.time.LocalDateTime.now();
+        updatedAt = java.time.LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = java.time.LocalDateTime.now();
     }
 
     public Long getId() {
@@ -87,11 +110,30 @@ public class User {
         this.status = status;
     }
 
+    @Column(nullable = true)
+    private Long institutionId;
+
+    public Long getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(Long institutionId) {
+        this.institutionId = institutionId;
+    }
+
     public String getInstitution() {
         return institution;
     }
 
     public void setInstitution(String institution) {
         this.institution = institution;
+    }
+
+    public java.time.LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public java.time.LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 }

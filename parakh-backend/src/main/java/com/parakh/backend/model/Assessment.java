@@ -4,7 +4,12 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "assessments")
+@Table(name = "assessments", indexes = {
+        @Index(name = "idx_assessment_classroom", columnList = "classroom_id"),
+        @Index(name = "idx_assessment_teacher", columnList = "teacher_id"),
+        @Index(name = "idx_assessment_inst", columnList = "institutionId"),
+        @Index(name = "idx_assessment_status", columnList = "status")
+})
 public class Assessment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +29,17 @@ public class Assessment {
     @Column(nullable = false)
     private String type; // "TOPIC" or "PDF"
 
+    @Column(nullable = true)
+    private Long institutionId;
+
+    public Long getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(Long institutionId) {
+        this.institutionId = institutionId;
+    }
+
     // TOPIC Mode Metadata
     private String subject;
     private String topic;
@@ -35,6 +51,15 @@ public class Assessment {
 
     @Column(nullable = false)
     private Integer durationMinutes;
+
+    @Column(nullable = false)
+    private Integer maxAttempts = 1;
+
+    @Column(nullable = true)
+    private LocalDateTime availableFrom;
+
+    @Column(nullable = true)
+    private LocalDateTime availableUntil;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -135,6 +160,30 @@ public class Assessment {
         this.durationMinutes = durationMinutes;
     }
 
+    public Integer getMaxAttempts() {
+        return maxAttempts;
+    }
+
+    public void setMaxAttempts(Integer maxAttempts) {
+        this.maxAttempts = maxAttempts;
+    }
+
+    public LocalDateTime getAvailableFrom() {
+        return availableFrom;
+    }
+
+    public void setAvailableFrom(LocalDateTime availableFrom) {
+        this.availableFrom = availableFrom;
+    }
+
+    public LocalDateTime getAvailableUntil() {
+        return availableUntil;
+    }
+
+    public void setAvailableUntil(LocalDateTime availableUntil) {
+        this.availableUntil = availableUntil;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -149,5 +198,17 @@ public class Assessment {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "assessment_questions", joinColumns = @JoinColumn(name = "assessment_id"), inverseJoinColumns = @JoinColumn(name = "question_id"))
+    private java.util.Set<Question> questions = new java.util.HashSet<>();
+
+    public java.util.Set<Question> getQuestions() {
+        return questions;
+    }
+
+    public void setQuestions(java.util.Set<Question> questions) {
+        this.questions = questions;
     }
 }

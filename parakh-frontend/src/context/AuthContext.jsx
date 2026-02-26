@@ -70,22 +70,17 @@ export const AuthProvider = ({ children }) => {
         // Save session in localStorage
         localStorage.setItem('user', JSON.stringify(validUser));
 
-        // Redirect based on role
-        if (validUser.role === 'ADMIN') {
-          navigate('/admin/dashboard', { replace: true });
-        } else if (validUser.role === 'STUDENT') {
-          navigate('/student/dashboard', { replace: true });
-        } else if (validUser.role === 'TEACHER') {
-          navigate('/teacher/dashboard', { replace: true });
-        }
+        // Redirect logic moved to component
 
-        return true;
+
+        return { success: true, user: validUser };
       } else {
-        return false;
+        const errorText = await response.text(); // Potential error details
+        return { success: false, error: errorText || 'Invalid credentials' };
       }
     } catch (error) {
       console.error('Login error:', error);
-      return false;
+      return { success: false, error: 'Network error' };
     }
   };
 

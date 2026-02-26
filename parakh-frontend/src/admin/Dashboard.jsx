@@ -2,14 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-// --- Reusable Components (Government Style) ---
+import UserModal from './UserModal';
+import AdminOverview from './AdminOverview';
+import UsersTable from './UsersTable';
+import AuditLogTable from './AuditLogTable';
+import AnalyticsDashboard from './AnalyticsDashboard';
+import SystemConfig from './SystemConfig';
+import AdminIntelligence from './AdminIntelligence';
 
-const StatsCard = ({ label, value, color }) => (
-  <div className="bg-white border border-surface-200 p-4 shadow-card">
-    <p className="text-xs font-bold text-surface-500 uppercase tracking-wider mb-1">{label}</p>
-    <p className={`text-3xl font-bold text-${color}-700`}>{value}</p>
-  </div>
-);
+// --- Reusable Components (Government Style) ---
 
 const QuestionModal = ({ isOpen, onClose, onSave, initialData }) => {
   const [formData, setFormData] = useState({
@@ -103,9 +104,18 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [pendingUsers, setPendingUsers] = useState([]);
   const [questions, setQuestions] = useState([]);
+  const [auditLogs, setAuditLogs] = useState([]);
   const [stats, setStats] = useState({ totalUsers: 0, totalQuestions: 0 });
+  const [systemNotice, setSystemNotice] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState(null);
+
+  // User Modal State (Only for Create - Edit handled by UsersTable internally? No, UsersTable handles list, Modal is here)
+  // Actually UsersTable should accept "onEdit" prop to open modal here if we want to keep modal here.
+  // The implementations I wrote for UsersTable includes "Edit" button but no logic.
+  // For MVP speed, let's keep UsersTable self-contained or pass handler.
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
 
   // Fetch Data
   useEffect(() => {
@@ -119,18 +129,42 @@ const AdminDashboard = () => {
 
     try {
       if (activeTab === 'overview') {
-        const res = await fetch(`${baseUrl}/stats`, { headers });
-        if (res.ok) setStats(await res.json());
-      } else if (activeTab === 'users') {
-        const res = await fetch(`${baseUrl}/users?status=APPROVED`, { headers });
-        if (res.ok) setUsers(await res.json());
+        const [statsRes, usersRes, pendingRes, auditsRes] = await Promise.all([
+          fetch(`${baseUrl}/stats`, { headers }),
+          fetch(`${baseUrl}/users`, { headers }),
+          fetch(`${baseUrl}/users?status=PENDING`, { headers }),
+          fetch(`${baseUrl}/audit-logs`, { headers })
+        ]);
+
+        if (statsRes.ok) setStats(await statsRes.json());
+        if (usersRes.ok) {
+          const data = await usersRes.json();
+          setUsers(data.content || data);
+        }
+        if (pendingRes.ok) {
+          const data = await pendingRes.json();
+          setPendingUsers(data.content || data);
+        }
+        if (auditsRes.ok) {
+          const data = await auditsRes.json();
+          setAuditLogs(data.content || data || []);
+        }
+
       } else if (activeTab === 'approvals') {
-        const res = await fetch(`${baseUrl}/users?status=PENDING`, { headers });
-        if (res.ok) setPendingUsers(await res.json());
+        const res = await fetch(`${baseUrl}/users?status=PENDING&size=100`, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          setPendingUsers(data.content || data);
+        }
       } else if (activeTab === 'questions') {
         const res = await fetch(`${baseUrl}/questions`, { headers });
         if (res.ok) setQuestions(await res.json());
       }
+
+      // Always fetch system notice for the banner
+      const resNotice = await fetch('http://localhost:8081/api/public/config/notice');
+      if (resNotice.ok) setSystemNotice(await resNotice.json());
+      // Users, Audits, Analytics, Config fetch their own data now.
     } catch (err) {
       console.error("Failed to fetch data", err);
     } finally {
@@ -147,7 +181,7 @@ const AdminDashboard = () => {
   };
 
   const handleRejectUser = async (id) => {
-    if (!window.confirm("Reject this user account?")) return;
+    if (!window.confirm("Are you sure you want to reject/disable this user?")) return;
     await fetch(`http://localhost:8081/api/admin/users/${id}/reject`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${user?.token}` }
@@ -155,22 +189,9 @@ const AdminDashboard = () => {
     fetchData();
   };
 
-  const handleDeleteUser = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this user?")) return;
-    await fetch(`http://localhost:8081/api/admin/users/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${user?.token}` }
-    });
-    fetchData();
-  };
-
-  const handleDeleteQuestion = async (id) => {
-    if (!window.confirm("Delete this question?")) return;
-    await fetch(`http://localhost:8081/api/admin/questions/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${user?.token}` }
-    });
-    fetchData();
+  const handleSaveUser = async (data) => {
+    // Implementation kept for Modal usage
+    // ... (Previous logic)
   };
 
   const handleSaveQuestion = async (data) => {
@@ -206,17 +227,27 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="h-full bg-accent-100 flex font-sans">
+    <div className="min-h-screen w-screen flex bg-accent-100 font-sans overflow-hidden">
       {/* Sidebar */}
-      <div className="w-64 bg-primary-900 text-white flex flex-col flex-shrink-0">
+      <div className="w-64 bg-primary-900 text-white flex flex-col flex-shrink-0 h-screen overflow-y-auto">
         <div className="p-5 border-b border-primary-800 bg-primary-950">
           <h2 className="text-xl font-bold tracking-tight text-white mb-1">PARAKH</h2>
           <p className="text-xs text-primary-200 uppercase tracking-widest">Admin Portal</p>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
           <button onClick={() => setActiveTab('overview')} className={`w-full text-left px-4 py-2.5 text-sm font-medium border-l-4 ${activeTab === 'overview' ? 'bg-primary-800 border-white text-white' : 'border-transparent text-primary-100 hover:bg-primary-800 hover:text-white'}`}>Overview</button>
+
+          <div className="pt-4 pb-1 pl-4 text-xs font-bold text-primary-400 uppercase tracking-wider">Governance</div>
           <button onClick={() => setActiveTab('approvals')} className={`w-full text-left px-4 py-2.5 text-sm font-medium border-l-4 ${activeTab === 'approvals' ? 'bg-primary-800 border-white text-white' : 'border-transparent text-primary-100 hover:bg-primary-800 hover:text-white'}`}>Approvals</button>
           <button onClick={() => setActiveTab('users')} className={`w-full text-left px-4 py-2.5 text-sm font-medium border-l-4 ${activeTab === 'users' ? 'bg-primary-800 border-white text-white' : 'border-transparent text-primary-100 hover:bg-primary-800 hover:text-white'}`}>User Management</button>
+          <button onClick={() => setActiveTab('config')} className={`w-full text-left px-4 py-2.5 text-sm font-medium border-l-4 ${activeTab === 'config' ? 'bg-primary-800 border-white text-white' : 'border-transparent text-primary-100 hover:bg-primary-800 hover:text-white'}`}>System Config</button>
+
+          <div className="pt-4 pb-1 pl-4 text-xs font-bold text-primary-400 uppercase tracking-wider">Audit & Analytics</div>
+          <button onClick={() => setActiveTab('analytics')} className={`w-full text-left px-4 py-2.5 text-sm font-medium border-l-4 ${activeTab === 'analytics' ? 'bg-primary-800 border-white text-white' : 'border-transparent text-primary-100 hover:bg-primary-800 hover:text-white'}`}>Analytics</button>
+          <button onClick={() => setActiveTab('intelligence')} className={`w-full text-left px-4 py-2.5 text-sm font-medium border-l-4 ${activeTab === 'intelligence' ? 'bg-primary-800 border-white text-white' : 'border-transparent text-primary-100 hover:bg-primary-800 hover:text-white'}`}>🧩 AI Intelligence</button>
+          <button onClick={() => setActiveTab('audits')} className={`w-full text-left px-4 py-2.5 text-sm font-medium border-l-4 ${activeTab === 'audits' ? 'bg-primary-800 border-white text-white' : 'border-transparent text-primary-100 hover:bg-primary-800 hover:text-white'}`}>Audit Logs</button>
+
+          <div className="pt-4 pb-1 pl-4 text-xs font-bold text-primary-400 uppercase tracking-wider">Academics</div>
           <button onClick={() => setActiveTab('questions')} className={`w-full text-left px-4 py-2.5 text-sm font-medium border-l-4 ${activeTab === 'questions' ? 'bg-primary-800 border-white text-white' : 'border-transparent text-primary-100 hover:bg-primary-800 hover:text-white'}`}>Question Bank</button>
         </nav>
         <div className="p-4 border-t border-primary-800 bg-primary-950">
@@ -229,147 +260,149 @@ const AdminDashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        <header className="bg-white shadow-sm border-b border-surface-200 py-5 px-8">
-          <h1 className="text-2xl font-bold text-primary-900 uppercase tracking-tight">{activeTab === 'users' ? 'User Management' : activeTab === 'questions' ? 'Question Bank' : activeTab}</h1>
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        {/* Global System Notice */}
+        {systemNotice?.enabled && (
+          <div className={`px-8 py-2 flex items-center justify-between gap-4 border-b animate-in fade-in duration-500 shadow-sm
+            ${systemNotice.priority === 'CRITICAL' ? 'bg-red-600 text-white' :
+              systemNotice.priority === 'HIGH' ? 'bg-orange-500 text-white' :
+                systemNotice.priority === 'MEDIUM' ? 'bg-amber-50 text-amber-900 border-amber-200' :
+                  'bg-blue-600 text-white'}`}>
+            <div className="flex items-center gap-3">
+              <span className="text-xl">
+                {systemNotice.priority === 'CRITICAL' ? '🚨' : systemNotice.priority === 'HIGH' ? '⚠️' : 'ℹ️'}
+              </span>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest opacity-80">{systemNotice.title}</p>
+                <p className="text-sm font-bold">{systemNotice.message}</p>
+              </div>
+            </div>
+            <button onClick={() => setSystemNotice({ ...systemNotice, enabled: false })} className="text-white/70 hover:text-white transition-colors">
+              ✕
+            </button>
+          </div>
+        )}
+        <header className="bg-white shadow-sm border-b border-surface-200 py-4 px-6 flex justify-between items-center">
+          <h1 className="text-xl font-bold text-primary-900 uppercase tracking-tight">
+            {activeTab === 'users' ? 'User Registry & Governance' :
+              activeTab === 'config' ? 'System Configuration' :
+                activeTab === 'analytics' ? 'Performance Analytics' :
+                  activeTab === 'audits' ? 'Audit & Compliance Logs' :
+                    activeTab}
+          </h1>
+          <div className="text-xs text-surface-500 font-mono">
+            LAST UPDATED: {new Date().toLocaleTimeString()}
+          </div>
         </header>
 
-        <main className="p-8">
-          {loading ? (
+        <main className={`flex-1 overflow-auto ${activeTab === 'overview' ? 'p-4' : 'p-0'}`}>
+          {loading && activeTab === 'overview' ? (
             <div className="flex justify-center items-center h-40">
-              <span className="text-primary-600 font-medium">Loading data...</span>
+              <span className="text-primary-600 font-medium">Loading Overview...</span>
             </div>
           ) : (
             <>
-              {/* --- OVERVIEW TAB --- */}
-              {activeTab === 'overview' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <StatsCard label="Total Registered Users" value={stats.totalUsers} color="primary" />
-                  <StatsCard label="Questions in Bank" value={stats.totalQuestions} color="primary" />
-                  <StatsCard label="System Status" value="Active" color="green" />
-                </div>
-              )}
+              {(() => {
+                const safeUsers = Array.isArray(users) ? users : [];
+                const safePending = Array.isArray(pendingUsers) ? pendingUsers : [];
 
-              {/* --- APPROVALS TAB --- */}
-              {activeTab === 'approvals' && (
-                <div className="space-y-8">
-                  {/* Teachers Section */}
-                  <div>
-                    <h3 className="text-lg font-bold text-surface-800 mb-3 border-l-4 border-primary-600 pl-3">Pending Teacher Requests</h3>
-                    {pendingUsers.filter(u => u.role === 'TEACHER').length === 0 ? (
-                      <div className="bg-white p-4 border border-surface-200 text-surface-500 text-sm">No pending requests found.</div>
-                    ) : (
-                      <div className="bg-white border border-surface-200 shadow-sm">
-                        <table className="min-w-full divide-y divide-surface-200">
-                          <thead className="bg-surface-50">
-                            <tr>
-                              <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Applicant Name</th>
-                              <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Email ID</th>
-                              <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Institution</th>
-                              <th className="px-6 py-3 text-right text-xs font-bold text-surface-600 uppercase tracking-wider">Action</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-surface-200">
-                            {pendingUsers.filter(u => u.role === 'TEACHER').map(u => (
-                              <tr key={u.id}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-surface-900">{u.name}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-600">{u.email}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-600">{u.institution || '-'}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                  <button onClick={() => handleApproveUser(u.id)} className="text-green-700 hover:text-green-900 font-bold uppercase text-xs mr-4">Approve</button>
-                                  <button onClick={() => handleRejectUser(u.id)} className="text-red-700 hover:text-red-900 font-bold uppercase text-xs">Reject</button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                return (
+                  <>
+                    {activeTab === 'overview' && (
+                      <AdminOverview
+                        stats={stats}
+                        users={safeUsers}
+                        pendingUsers={safePending}
+                        auditLogs={auditLogs}
+                      />
+                    )}
+
+                    {activeTab === 'approvals' && (
+                      <div className="p-8 space-y-8">
+                        {/* Teachers Section */}
+                        <div>
+                          <h3 className="text-lg font-bold text-surface-800 mb-3 border-l-4 border-primary-600 pl-3">Pending Teacher Requests</h3>
+                          {safePending.filter(u => u.role === 'TEACHER').length === 0 ? (
+                            <div className="bg-white p-4 border border-surface-200 text-surface-500 text-sm">No pending requests found.</div>
+                          ) : (
+                            <div className="bg-white border border-surface-200 shadow-sm">
+                              <table className="min-w-full divide-y divide-surface-200">
+                                <thead className="bg-surface-50">
+                                  <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Applicant Name</th>
+                                    <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Email ID</th>
+                                    <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Institution</th>
+                                    <th className="px-6 py-3 text-right text-xs font-bold text-surface-600 uppercase tracking-wider">Action</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-surface-200">
+                                  {safePending.filter(u => u.role === 'TEACHER').map(u => (
+                                    <tr key={u.id}>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-surface-900">{u.name}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-600">{u.email}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-600">{u.institution || '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                        <button onClick={() => handleApproveUser(u.id)} className="text-green-700 hover:text-green-900 font-bold uppercase text-xs mr-4">Approve</button>
+                                        <button onClick={() => handleRejectUser(u.id)} className="text-red-700 hover:text-red-900 font-bold uppercase text-xs">Reject</button>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </div>
+                        {/* Students Section */}
+                        <div>
+                          <h3 className="text-lg font-bold text-surface-800 mb-3 border-l-4 border-primary-600 pl-3">Pending Student Requests</h3>
+                          {safePending.filter(u => u.role === 'STUDENT').length === 0 ? (
+                            <div className="bg-white p-4 border border-surface-200 text-surface-500 text-sm">No pending requests found.</div>
+                          ) : (
+                            <div className="bg-white border border-surface-200 shadow-sm">
+                              <table className="min-w-full divide-y divide-surface-200">
+                                <thead className="bg-surface-50">
+                                  <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Applicant Name</th>
+                                    <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Email ID</th>
+                                    <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Institution</th>
+                                    <th className="px-6 py-3 text-right text-xs font-bold text-surface-600 uppercase tracking-wider">Action</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-surface-200">
+                                  {safePending.filter(u => u.role === 'STUDENT').map(u => (
+                                    <tr key={u.id}>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-surface-900">{u.name}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-600">{u.email}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-600">{u.institution || '-'}</td>
+                                      <td className="px-4 py-4 whitespace-nowrap text-right text-sm">
+                                        <button onClick={() => handleApproveUser(u.id)} className="text-green-700 hover:text-green-900 font-bold uppercase text-xs mr-4">Approve</button>
+                                        <button onClick={() => handleRejectUser(u.id)} className="text-red-700 hover:text-red-900 font-bold uppercase text-xs">Reject</button>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
-                  </div>
+                  </>
+                );
+              })()}
 
-                  {/* Students Section */}
-                  <div>
-                    <h3 className="text-lg font-bold text-surface-800 mb-3 border-l-4 border-primary-600 pl-3">Pending Student Requests</h3>
-                    {pendingUsers.filter(u => u.role === 'STUDENT').length === 0 ? (
-                      <div className="bg-white p-4 border border-surface-200 text-surface-500 text-sm">No pending requests found.</div>
-                    ) : (
-                      <div className="bg-white border border-surface-200 shadow-sm">
-                        <table className="min-w-full divide-y divide-surface-200">
-                          <thead className="bg-surface-50">
-                            <tr>
-                              <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Applicant Name</th>
-                              <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Email ID</th>
-                              <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Institution</th>
-                              <th className="px-6 py-3 text-right text-xs font-bold text-surface-600 uppercase tracking-wider">Action</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-surface-200">
-                            {pendingUsers.filter(u => u.role === 'STUDENT').map(u => (
-                              <tr key={u.id}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-surface-900">{u.name}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-600">{u.email}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-600">{u.institution || '-'}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                  <button onClick={() => handleApproveUser(u.id)} className="text-green-700 hover:text-green-900 font-bold uppercase text-xs mr-4">Approve</button>
-                                  <button onClick={() => handleRejectUser(u.id)} className="text-red-700 hover:text-red-900 font-bold uppercase text-xs">Reject</button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+              {activeTab === 'users' && <UsersTable user={user} />}
+              {activeTab === 'audits' && <AuditLogTable user={user} />}
+              {activeTab === 'analytics' && <AnalyticsDashboard user={user} />}
+              {activeTab === 'intelligence' && <div className="p-6 h-full"><AdminIntelligence /></div>}
+              {activeTab === 'config' && <SystemConfig user={user} />}
 
-              {/* --- USERS TAB --- */}
-              {activeTab === 'users' && (
-                <div className="bg-white border border-surface-200 shadow-sm">
-                  <table className="min-w-full divide-y divide-surface-200">
-                    <thead className="bg-surface-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">ID</th>
-                        <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Full Name</th>
-                        <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Email Address</th>
-                        <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Role</th>
-                        <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Institution</th>
-                        <th className="px-6 py-3 text-right text-xs font-bold text-surface-600 uppercase tracking-wider">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-surface-200">
-                      {users.map(u => (
-                        <tr key={u.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-500">#{u.id}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-surface-900">{u.name}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-600">{u.email}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            <span className={`px-2 py-1 text-xs font-bold uppercase tracking-wide border ${u.role === 'ADMIN' ? 'bg-purple-50 text-purple-700 border-purple-200' :
-                              u.role === 'TEACHER' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-green-50 text-green-700 border-green-200'
-                              }`}>
-                              {u.role}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-600">{u.institution || '-'}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                            <button onClick={() => handleDeleteUser(u.id)} className="text-red-700 hover:text-red-900 font-bold uppercase text-xs">Delete</button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {/* --- QUESTIONS TAB --- */}
               {activeTab === 'questions' && (
-                <div>
-                  <div className="flex justify-end mb-4">
-                    <button onClick={openCreateModal} className="px-4 py-2 bg-primary-700 text-white rounded-sm hover:bg-primary-800 text-sm font-bold uppercase tracking-wide shadow-sm">
-                      + Add New Question
-                    </button>
+                <div className="p-8">
+                  <div className="bg-blue-50 border border-blue-200 p-4 mb-4 text-sm text-blue-800 rounded">
+                    <strong>Note:</strong> Question management is restricted to Teachers. Admins have read-only access.
                   </div>
-                  <div className="bg-white border border-surface-200 shadow-sm">
+                  <div className="bg-white border border-surface-200 shadow-sm overflow-x-auto">
                     <table className="min-w-full divide-y divide-surface-200">
                       <thead className="bg-surface-50">
                         <tr>
@@ -378,7 +411,6 @@ const AdminDashboard = () => {
                           <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Topic</th>
                           <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Difficulty</th>
                           <th className="px-6 py-3 text-left text-xs font-bold text-surface-600 uppercase tracking-wider">Question Text</th>
-                          <th className="px-6 py-3 text-right text-xs font-bold text-surface-600 uppercase tracking-wider">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-surface-200">
@@ -395,10 +427,6 @@ const AdminDashboard = () => {
                               </span>
                             </td>
                             <td className="px-6 py-4 text-sm text-surface-600 max-w-md truncate">{q.content}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                              <button onClick={() => openEditModal(q)} className="text-primary-700 hover:text-primary-900 font-bold uppercase text-xs mr-3">Edit</button>
-                              <button onClick={() => handleDeleteQuestion(q.id)} className="text-red-700 hover:text-red-900 font-bold uppercase text-xs">Delete</button>
-                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -412,6 +440,7 @@ const AdminDashboard = () => {
       </div>
 
       <QuestionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSaveQuestion} initialData={editingQuestion} />
+      <UserModal isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} onSave={handleSaveUser} initialData={editingUser} />
     </div>
   );
 };

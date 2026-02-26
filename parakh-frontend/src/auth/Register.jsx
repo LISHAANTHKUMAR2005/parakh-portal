@@ -149,8 +149,8 @@ const Register = () => {
           <svg className="w-16 h-16 text-green-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <h2 className="text-2xl font-bold text-green-900 mb-2">Registration Successful!</h2>
-          <p className="text-surface-600 mb-4">Your account has been created successfully.</p>
+          <h2 className="text-2xl font-bold text-green-900 mb-2">Registration Submitted!</h2>
+          <p className="text-surface-600 mb-4">Your account has been created and is pending administrator approval.</p>
           <p className="text-sm text-surface-500">Redirecting to login page...</p>
         </div>
       </div>
@@ -396,8 +396,8 @@ const Register = () => {
               type="submit"
               disabled={loading}
               className={`w-full py-3 px-4 text-white font-bold shadow-md transition-all uppercase tracking-wide text-sm ${loading
-                  ? 'bg-surface-400 cursor-not-allowed'
-                  : 'bg-primary-900 hover:bg-primary-800 focus:ring-2 focus:ring-offset-2 focus:ring-primary-700'
+                ? 'bg-surface-400 cursor-not-allowed'
+                : 'bg-primary-900 hover:bg-primary-800 focus:ring-2 focus:ring-offset-2 focus:ring-primary-700'
                 }`}
             >
               {loading ? (

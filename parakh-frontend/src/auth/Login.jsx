@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -14,12 +14,12 @@ const Login = () => {
   const [touched, setTouched] = useState({ email: false, password: false });
 
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
-
   const getEmailError = () => {
     if (!touched.email) return '';
     if (!formData.email.trim()) return 'Email is required';
@@ -68,10 +68,18 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const success = await login(formData.email, formData.password);
+      const result = await login(formData.email, formData.password);
 
-      if (!success) {
-        setError('Invalid credentials. Please check your email and password.');
+      if (result.success) {
+        // Handle successful login & redirection
+        const role = result.user.role;
+
+        if (role === 'ADMIN') navigate('/admin/dashboard', { replace: true });
+        else if (role === 'TEACHER') navigate('/teacher/dashboard', { replace: true });
+        else if (role === 'STUDENT') navigate('/student/dashboard', { replace: true });
+        else setError('Unknown role');
+      } else {
+        setError(result.error || 'Invalid credentials. Please check your email and password.');
       }
     } catch (err) {
       setError('Network error. Please check your internet connection and try again.');
@@ -221,8 +229,8 @@ const Login = () => {
               type="submit"
               disabled={loading}
               className={`w-full py-3 px-4 text-white font-bold shadow-md transition-all uppercase tracking-wide text-sm ${loading
-                  ? 'bg-surface-400 cursor-not-allowed'
-                  : 'bg-primary-900 hover:bg-primary-800 focus:ring-2 focus:ring-offset-2 focus:ring-primary-700'
+                ? 'bg-surface-400 cursor-not-allowed'
+                : 'bg-primary-900 hover:bg-primary-800 focus:ring-2 focus:ring-offset-2 focus:ring-primary-700'
                 }`}
             >
               {loading ? (

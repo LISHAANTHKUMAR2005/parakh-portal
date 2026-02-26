@@ -5,7 +5,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "classrooms")
+@Table(name = "classrooms", indexes = {
+        @Index(name = "idx_class_teacher", columnList = "teacher_id"),
+        @Index(name = "idx_class_inst", columnList = "institutionId"),
+        @Index(name = "idx_class_name", columnList = "name")
+})
 public class Classroom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -13,6 +17,17 @@ public class Classroom {
 
     @Column(nullable = false)
     private String name;
+
+    @Column(nullable = true)
+    private Long institutionId;
+
+    public Long getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(Long institutionId) {
+        this.institutionId = institutionId;
+    }
 
     @Column(nullable = false)
     private String subject;
@@ -27,6 +42,14 @@ public class Classroom {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "class_students", joinColumns = @JoinColumn(name = "classroom_id"), inverseJoinColumns = @JoinColumn(name = "student_id"))
     private Set<User> students = new HashSet<>();
+
+    @Column(nullable = false, updatable = false)
+    private java.time.LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = java.time.LocalDateTime.now();
+    }
 
     public Classroom() {
     }
@@ -85,5 +108,9 @@ public class Classroom {
 
     public void setStudents(Set<User> students) {
         this.students = students;
+    }
+
+    public java.time.LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }

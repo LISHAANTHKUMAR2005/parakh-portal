@@ -3,7 +3,10 @@ package com.parakh.backend.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "student_responses")
+@Table(name = "student_responses", indexes = {
+        @Index(name = "idx_sr_exam", columnList = "exam_id"),
+        @Index(name = "idx_sr_question", columnList = "question_id")
+})
 public class StudentResponse {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

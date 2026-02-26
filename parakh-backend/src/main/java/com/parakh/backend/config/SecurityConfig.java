@@ -33,7 +33,12 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // Open login
+                        .requestMatchers("/api/public/**").permitAll() // Public config
+                        .requestMatchers("/api/health").permitAll() // Health check
                         .requestMatchers("/h2-console/**").permitAll() // Open H2 console
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // Only Admin
+                        .requestMatchers("/api/student/**").hasAnyRole("STUDENT", "ADMIN") // Student or Admin
+                        .requestMatchers("/api/teacher/**").hasAnyRole("TEACHER", "ADMIN") // Teacher or Admin
                         .anyRequest().authenticated() // Secure everything else
                 )
                 .sessionManagement(session -> session
